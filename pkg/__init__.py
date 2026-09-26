@@ -15,6 +15,7 @@ from .config import config
 from .models import AppSetting, AuditLog, User, db
 from .models import ContactMessage, GeneratedAudio, PaymentComplaint, PaymentRequest, UserEntitlement, VoiceModel
 from .audio_retention import cleanup_expired_audio, initialize_legacy_conversion_retention
+from .download_models import download_foundation_models
 from .services import ModelManager
 from .user_routes import user_bp
 
@@ -225,6 +226,8 @@ def create_app(test_config=None):
             ensure_local_voice_models()
             initialize_legacy_conversion_retention()
             cleanup_expired_audio(app)
+            import threading
+            threading.Thread(target=download_foundation_models, name="foundation-models-download", daemon=True).start()
         except Exception as startup_err:
             db.session.rollback()
             print(f"App context startup initialization warning: {startup_err}")

@@ -146,6 +146,9 @@ class RVCService:
         index_file = Path(index_path).resolve() if index_path else None
         if index_file and (not index_file.is_file() or index_file.suffix.lower() != ".index"):
             raise FileNotFoundError("The selected RVC index file is unavailable.")
+        rmvpe_file = root / "assets" / "rmvpe" / "rmvpe.pt"
+        if f0_method == "rmvpe" and not rmvpe_file.is_file():
+            f0_method = "pm"
         environment = os.environ.copy()
         environment["PYTHONPATH"] = str(root) + os.pathsep + environment.get("PYTHONPATH", "")
         environment["PYTHONIOENCODING"] = "utf-8"

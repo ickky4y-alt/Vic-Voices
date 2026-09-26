@@ -83,9 +83,17 @@ def _generate_local(text: str, voice: str, output_path: str, ffmpeg_path: str | 
     import numpy as np
 
     audio_chunks = []
-    for _, _, audio in _load_pipeline()(text.strip(), voice=voice, speed=selected_speed):
-        if audio is not None:
-            audio_chunks.append(audio.detach().cpu().numpy() if hasattr(audio, "detach") else np.asarray(audio))
+    try:
+        import torch
+        inference_ctx = torch.inference_mode()
+    except Exception:
+        import contextlib
+        inference_ctx = contextlib.nullcontext()
+
+    with inference_ctx:
+        for _, _, audio in _load_pipeline()(text.strip(), voice=voice, speed=selected_speed):
+            if audio is not None:
+                audio_chunks.append(audio.detach().cpu().numpy() if hasattr(audio, "detach") else np.asarray(audio))
     if not audio_chunks:
         raise RuntimeError("Kokoro did not return any audio.")
 
