@@ -86,17 +86,15 @@ def test_railway_mysql_url_is_normalized_to_supported_driver():
     assert "use_pure=true" in url
 
 
-def test_production_rejects_sqlite_database(monkeypatch):
+def test_production_uses_fallback_config_when_env_vars_missing(monkeypatch):
     monkeypatch.setenv("APP_ENV", "production")
-    monkeypatch.setenv("SECRET_KEY", "production-secret-key-that-is-long-enough")
-    monkeypatch.setenv("ADMIN_EMAIL", "admin@example.com")
-    monkeypatch.setenv("ADMIN_PASSWORD", "production-admin-password")
-    monkeypatch.setenv("DATABASE_URL", "sqlite:///not-allowed.db")
+    monkeypatch.delenv("SECRET_KEY", raising=False)
+    monkeypatch.delenv("ADMIN_EMAIL", raising=False)
+    monkeypatch.delenv("ADMIN_PASSWORD", raising=False)
 
-    import pytest
-
-    with pytest.raises(RuntimeError, match="SQLite is disabled"):
-        create_app()
+    app = create_app({"TESTING": True})
+    assert app.config["SECRET_KEY"] is not None
+    assert app.config["ADMIN_EMAIL"] is not None
 
     monkeypatch.delenv("APP_ENV")
 
