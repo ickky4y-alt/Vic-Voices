@@ -1,0 +1,16 @@
+{% extends 'admin/base.html' %}
+{% block title %}Conversion Details{% endblock %}
+{% block description %}Private administrator details for a Vic Voices audio conversion job.{% endblock %}
+{% block content %}
+  <div class="admin-panel">
+    <h2>Conversion #{{ conversion.id }}</h2>
+    <table class="table">
+      <tr><th>Voice</th><td>{{ conversion.voice_name }}</td></tr>
+      <tr><th>Status</th><td>{{ conversion.status }}</td></tr>
+      <tr><th>Model</th><td>{{ conversion.model_name or 'N/A' }}</td></tr>
+      <tr><th>User</th><td>{{ conversion.user.email if conversion.user else 'Guest' }}</td></tr>
+      <tr><th>Output</th><td>{{ conversion.output_path or 'Pending' }}</td></tr>
+      <tr><th>Error</th><td>{{ conversion.error or 'None' }}</td></tr>
+    </table>
+  </div>
+{% endblock %}

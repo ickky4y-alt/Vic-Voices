@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Vic Voices</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="#0b1020"/>
+  <path d="M13 25h5v14h-5zm10-9h5v32h-5zm10 5h5v22h-5zm10-9h5v40h-5zm10 13h5v14h-5z" fill="url(#bg)"/>
+</svg>

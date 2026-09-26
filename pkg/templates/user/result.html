@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Result | Vic Voices{% endblock %}
+{% block description %}Listen to or download your private Vic Voices audio conversion result.{% endblock %}
+{% block robots %}noindex, nofollow, noarchive{% endblock %}
+{% block head %}{% if conversion.status in ['queued', 'processing'] %}<meta http-equiv="refresh" content="5">{% endif %}{% endblock %}
+{% block content %}
+<h1>Conversion result</h1>
+<div class="card">
+  <p><strong>Original:</strong> {{ conversion.original_filename or 'Audio file' }}</p>
+  <p><strong>Voice:</strong> {{ conversion.voice_name }}</p>
+  <p><strong>Status:</strong> {{ conversion.status }}</p>
+  {% if conversion.status == 'completed' and conversion.output_expired %}
+    <div class="storage-expired-notice"><strong>This audio has expired and its file was securely removed.</strong><p>Free audio is stored for 7 days. Paid access keeps eligible saved audio through the active plan and for a 7-day grace period afterward.</p><a class="button primary" href="{{ url_for('user.billing') }}">Upgrade for longer storage</a></div>
+  {% elif conversion.status == 'completed' and conversion.output_path %}
+    {% if conversion.retention_expires_at %}<p class="audio-retention-note"><i class="bi bi-clock-history" aria-hidden="true"></i> {% if conversion.storage_tier == 'paid' %}Extended storage until{% else %}Free storage until{% endif %} <strong>{{ conversion.retention_expires_at.strftime('%b %d, %Y at %H:%M') }}</strong>{% if conversion.storage_tier != 'paid' %} · <a href="{{ url_for('user.billing') }}">Upgrade to keep audio longer</a>{% endif %}</p>{% endif %}
+    <audio controls src="{{ url_for('user.download', conversion_id=conversion.id) }}"></audio>
+    <div class="cta-row">
+      <a class="button primary" href="{{ url_for('user.download', conversion_id=conversion.id) }}">Download</a>
+      <a class="button secondary" href="{{ url_for('user.converter') }}">Convert again</a>
+    </div>
+  {% elif conversion.status == 'failed' %}
+    <p class="error-box">{{ conversion.error or 'The conversion failed. Try another voice or file.' }}</p>
+    <a class="button secondary" href="{{ url_for('user.converter') }}">Try again</a>
+  {% else %}
+    <p>Your conversion is still processing.</p>
+    <p class="muted">Audio below 30 seconds usually takes about 1–2 minutes to convert. Longer recordings may take more time depending on their length and the selected voice model. You can leave this page open while the result updates automatically.</p>
+    {% if estimated_seconds and started_timestamp %}
+      <p><strong>Estimated time:</strong> <span id="conversion-countdown">calculating...</span></p>
+      <script>
+        (() => {
+          const countdown = document.getElementById("conversion-countdown");
+          const estimate = {{ estimated_seconds }};
+          const started = {{ started_timestamp }} * 1000;
+          const update = () => {
+            const remaining = Math.ceil(estimate - (Date.now() - started) / 1000);
+            if (remaining <= 0) {
+              countdown.textContent = "taking longer than estimated";
+              return;
+            }
+            const minutes = Math.floor(remaining / 60);
+            const seconds = remaining % 60;
+            countdown.textContent = `${minutes}m ${String(seconds).padStart(2, "0")}s remaining`;
+          };
+          update();
+          window.setInterval(update, 1000);
+        })();
+      </script>
+    {% endif %}
+    <form method="post" action="{{ url_for('user.cancel_conversion', conversion_id=conversion.id) }}">
+      <button class="button secondary" type="submit">Cancel conversion</button>
+    </form>
+  {% endif %}
+  <form method="post" action="{{ url_for('user.delete_conversion', conversion_id=conversion.id) }}" style="margin-top: 18px;">
+    <button class="button secondary" type="submit">Delete result</button>
+  </form>
+</div>
+{% endblock %}

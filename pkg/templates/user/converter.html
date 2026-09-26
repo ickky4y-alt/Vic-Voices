@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Converter | Vic Voices{% endblock %}
+{% block description %}Convert an audio recording with an available local RVC voice model and customize the conversion settings.{% endblock %}
+{% block robots %}noindex, nofollow, noarchive{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/voiceforge.css') }}">{% endblock %}
+{% block content %}
+<h1>Vic audio studio</h1>
+<div class="trial-balance-grid converter-trial-balances" aria-label="Your current free trials">
+  <article class="trial-balance-card"><span class="trial-balance-card__icon"><i class="bi bi-soundwave" aria-hidden="true"></i></span><div><p class="eyebrow">Vic TTS voices</p><strong>{{ tts_trials_available }}</strong><span>{{ 'available' if tts_trials_available == 'Unlimited' else 'free generations available' }}</span></div><p>Voice previews are always free. TTS usage is counted after speech is generated successfully.</p></article>
+  <article class="trial-balance-card"><span class="trial-balance-card__icon"><i class="bi bi-music-note-beamed" aria-hidden="true"></i></span><div><p class="eyebrow">Vic RVC audio conversion models</p><strong>{{ conversion_trials_available }}</strong><span>{{ 'available' if conversion_trials_available == 'Unlimited' else 'free conversions available' }}</span></div><p>Only a successful conversion uses one trial. Failed or cancelled jobs do not.</p></article>
+</div>
+<p class="audio-retention-note"><i class="bi bi-clock-history" aria-hidden="true"></i> Successful audio is saved in your <a href="{{ url_for('user.history') }}">History</a> for 7 days on the free tier. An active paid plan extends storage through the plan and a 7-day grace period after it ends. <a href="{{ url_for('user.billing') }}">Explore longer storage</a>.</p>
+{% if session.get('recorded_audio_path') %}<p class="flash flash-success">Your recording is ready. Choose a voice and click Convert audio.</p>{% endif %}
+<div class="converter-layout">
+  <form method="post" enctype="multipart/form-data" class="card-form converter-panel converter-panel--main">
+    {{ form.hidden_tag() }}
+    <div class="field">
+      <label>Audio file</label>
+      <input type="file" name="audio_file" accept="audio/*">
+    </div>
+    <div class="field">
+      {{ form.model_id.label }}
+      <small class="field-hint">Each model uses the same account conversion balance. A trial is deducted only when the result completes successfully.</small>
+      {{ form.model_id(class_='input') }}
+    </div>
+    <div class="field-row">
+      <div class="field">
+        {{ form.pitch.label }}
+        {{ form.pitch(class_='input') }}
+      </div>
+      <div class="field">
+        {{ form.f0_method.label }}
+        {{ form.f0_method(class_='input') }}
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        {{ form.index_rate.label }}
+        {{ form.index_rate(class_='input') }}
+      </div>
+      <div class="field">
+        {{ form.protect.label }}
+        {{ form.protect(class_='input') }}
+      </div>
+    </div>
+    <div class="field">
+      {{ form.output_format.label }}
+      {{ form.output_format(class_='input') }}
+    </div>
+    <button type="submit" class="button primary">Convert</button>
+  </form>
+
+  <section id="tts-mode" class="converter-panel converter-panel--tts">
+    <div class="forge-intro">
+      <p class="eyebrow">Text to speech</p>
+      <h2>Turn a script into sound.</h2>
+      <p class="lede">You have {{ tts_trials_available }} {{ 'speech generation(s)' if tts_trials_available == 'Unlimited' else 'free speech generation(s)' }} available. Listening to voice previews is always free.</p>
+    </div>
+    <form id="tts-form" class="forge-card">
+      <div class="field">
+        <div class="label-row"><label for="text">Your script</label><span id="counter">0 / 2000</span></div>
+        <textarea id="text" maxlength="2000" placeholder="Type something worth hearing..." required></textarea>
+      </div>
+      <div class="field">
+        <label for="voice">Voice</label>
+        <select id="voice" required><option value="">Loading preset voices...</option></select>
+      </div>
+      <div class="field">
+        <label for="style">Speech style</label>
+        <select id="style" required><option value="">Loading styles...</option></select>
+        <small id="style-description" class="field-hint"></small>
+      </div>
+      <div class="field">
+        <div class="label-row"><label for="speed">Playback speed</label><output id="speed-value">1.00x</output></div>
+        <input id="speed" type="range" min="0.5" max="2" step="0.05" value="1">
+      </div>
+      <button id="generate" class="forge-button" type="submit"><span class="spinner" aria-hidden="true"></span><span>Generate speech</span></button>
+      <p id="message" class="message" role="status" aria-live="polite"></p>
+      <div id="result" class="result" hidden>
+        <audio id="player" controls></audio>
+        <label class="player-speed">Player speed <select id="player-speed"><option>0.75</option><option selected>1</option><option>1.25</option><option>1.5</option><option>2</option></select>x</label>
+        <a id="download" class="download" download>Download audio</a>
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/voiceforge.js') }}"></script>{% endblock %}

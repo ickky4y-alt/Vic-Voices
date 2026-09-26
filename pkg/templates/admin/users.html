@@ -1,0 +1,37 @@
+{% extends 'admin/base.html' %}
+{% block title %}Users{% endblock %}
+{% block description %}Search and manage user accounts in the private Vic Voices admin console.{% endblock %}
+{% block content %}
+  <div class="admin-panel">
+    <h2>Users</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Trials</th><th>Access</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>{{ 'Active' if user.active else 'Disabled' }}</td>
+            <td>{{ user.entitlement.tts_trials_remaining if user.entitlement else 8 }} TTS / {{ user.entitlement.conversion_trials_remaining if user.entitlement else 5 }} RVC</td>
+            <td>{{ 'Active' if access_status.get(user.id) else 'Trial' }}</td>
+            <td>
+              <a class="btn" href="{{ url_for('admin.user_detail', user_id=user.id) }}">View</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8">No users found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

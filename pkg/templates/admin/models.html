@@ -1,0 +1,74 @@
+{% extends 'admin/base.html' %}
+{% block title %}Model Management{% endblock %}
+{% block description %}Manage voice-conversion models and their availability in the private Vic Voices admin console.{% endblock %}
+{% block content %}
+  <div class="admin-panel">
+    <h2>Model Management</h2>
+    <form method="post" action="{{ url_for('admin.scan_models') }}" style="margin-bottom: 18px;">
+      <button class="btn primary" type="submit">Scan RVC weights directory</button>
+    </form>
+    <form method="post" enctype="multipart/form-data">
+      <div class="form-grid">
+        <div class="field">
+          <label>Name</label>
+          <input class="input" name="name" required>
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <input class="input" name="category" value="general">
+        </div>
+        <div class="field">
+          <label>Source</label>
+          <input class="input" name="source" value="local">
+        </div>
+        <div class="field">
+          <label>License</label>
+          <input class="input" name="license" value="unknown">
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <label>Description</label>
+          <textarea name="description"></textarea>
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <label>Model file</label>
+          <input class="input" type="file" name="model_file" required>
+        </div>
+      </div>
+      <button class="btn primary" type="submit">Upload model</button>
+    </form>
+  </div>
+
+  <div class="admin-panel" style="margin-top: 22px;">
+    <h3>Available models</h3>
+    <table class="table">
+      <thead>
+        <tr><th>Name</th><th>Status</th><th>File</th><th>Validation</th><th>Index</th><th>Visibility</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for model in models %}
+          <tr>
+            <td>{{ model.name }}</td>
+            <td>{{ model.status }}</td>
+            <td>{{ 'Present' if model.path and model.file_size else 'Missing' }}</td>
+            <td>{{ model.validation_status }}{% if model.last_validated_at %}<br><small>{{ model.last_validated_at.strftime('%Y-%m-%d %H:%M') }}</small>{% endif %}</td>
+            <td>{{ 'Available' if model.index_path else 'None' }}</td>
+            <td>{{ model.visibility }}</td>
+            <td>
+              <form method="post" action="{{ url_for('admin.validate_model', model_id=model.id) }}" style="display:inline;">
+                <button class="btn" type="submit">Validate</button>
+              </form>
+              <form method="post" action="{{ url_for('admin.toggle_model', model_id=model.id) }}" style="display:inline;">
+                <button class="btn" type="submit">{{ 'Disable' if model.enabled else 'Enable' }}</button>
+              </form>
+              <form method="post" action="{{ url_for('admin.delete_model', model_id=model.id) }}" style="display:inline;">
+                <button class="btn danger" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="7">No voice models are currently available. Place a real .pth file in the configured RVC weights directory, then scan again.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}History | Vic Voices{% endblock %}
+{% block description %}Review your saved Vic Voices speech and conversion audio, download available files, and see when free storage expires.{% endblock %}
+{% block robots %}noindex, nofollow, noarchive{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/voiceforge.css') }}">{% endblock %}
+{% block content %}
+<section class="library-shell">
+  <p class="eyebrow">Your creative archive</p>
+  <h1>Audio history</h1>
+  <p class="lede">Your generated speech and completed conversions live here. Free audio stays available for 7 days. Upgrade to paid access to keep saved audio for the duration of your plan, plus a 7-day grace period after it ends.</p>
+  <div class="storage-upgrade-banner">
+    <div><p class="eyebrow">Keep your best takes</p><h2>More time for the audio you love.</h2><p>With an active paid plan, eligible saved audio is retained through your access period and for 7 days after expiry. Upgrade before free audio expires to extend its storage window.</p></div>
+    <a class="button primary" href="{{ url_for('user.billing') }}"><i class="bi bi-stars" aria-hidden="true"></i> Upgrade for longer storage</a>
+  </div>
+
+  <section class="card-form saved-audio-panel">
+    <h2><i class="bi bi-soundwave" aria-hidden="true"></i> Generated TTS audio</h2>
+    <p class="muted">Only successful speech generations appear here. Free voice previews are not saved to your account or counted as usage.</p>
+    <div class="saved-audio-list">
+      {% for audio in generated_audio %}
+      <article class="saved-audio-item {% if audio.expired %}saved-audio-item--expired{% endif %}">
+        <div class="saved-audio-item__info"><span class="plan-badge {{ 'plan-badge--featured' if audio.storage_tier == 'paid' else '' }}">{{ 'Extended storage' if audio.storage_tier == 'paid' else '7-day free storage' }}</span><h3>{{ audio.voice_name }} <span class="muted">· {{ audio.style_name|title }}</span></h3><p class="muted">Created {{ audio.created_at.strftime('%b %d, %Y at %H:%M') }}{% if audio.expired %} · Audio expired and was removed{% else %} · Available until {{ audio.expires_at.strftime('%b %d, %Y at %H:%M') }}{% endif %}</p></div>
+        {% if audio.expired %}<span class="expired-label"><i class="bi bi-clock-history" aria-hidden="true"></i> Expired</span>{% else %}<a class="button secondary" href="{{ url_for('user.tts_download', filename=audio.filename) }}"><i class="bi bi-download" aria-hidden="true"></i> Download</a>{% endif %}
+      </article>
+      {% else %}<p class="muted">Your successful speech generations will appear here.</p>{% endfor %}
+    </div>
+  </section>
+
+  <form class="card-form history-filter" method="get"><div class="field-row"><input class="input" name="q" value="{{ search }}" placeholder="Search file or voice"><select class="input" name="status"><option value="">All statuses</option>{% for value in ['completed','processing','failed','cancelled'] %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ value|title }}</option>{% endfor %}</select></div><button class="button secondary" type="submit">Filter conversions</button></form>
+  <section class="card saved-audio-panel"><h2><i class="bi bi-music-note-beamed" aria-hidden="true"></i> Vic RVC conversions</h2><p class="muted">A conversion uses a trial only after it succeeds. Free results are kept for 7 days; active paid access extends eligible saved audio through the plan and its 7-day grace period.</p><div class="saved-audio-list">
+    {% for item in history %}
+    <article class="saved-audio-item {% if item.output_expired %}saved-audio-item--expired{% endif %}">
+      <div class="saved-audio-item__info"><span class="plan-badge {{ 'plan-badge--featured' if item.storage_tier == 'paid' else '' }}">{{ 'Extended storage' if item.storage_tier == 'paid' else '7-day free storage' }}</span><h3>{{ item.original_filename or 'Audio file' }} <span class="muted">· {{ item.voice_name }}</span></h3><p class="muted">{{ item.status|title }} · {{ item.created_at.strftime('%b %d, %Y at %H:%M') }}{% if item.status == 'completed' and item.output_expired %} · Audio expired and was removed{% elif item.status == 'completed' and item.retention_expires_at %} · Available until {{ item.retention_expires_at.strftime('%b %d, %Y at %H:%M') }}{% endif %}</p></div>
+      <div class="saved-audio-item__actions"><a class="button secondary" href="{{ url_for('user.history_detail', conversion_id=item.id) }}">Details</a>{% if item.status == 'completed' and not item.output_expired and item.output_path %}<a class="button secondary" href="{{ url_for('user.download', conversion_id=item.id) }}"><i class="bi bi-download" aria-hidden="true"></i> Download</a>{% endif %}</div>
+    </article>
+    {% else %}<p class="muted">Your completed and in-progress conversions will appear here.</p>{% endfor %}
+  </div></section>
+  {% if pagination.pages > 1 %}<p>Page {{ pagination.page }} of {{ pagination.pages }}</p>{% endif %}
+  <section class="card history-activity"><h2>Account activity</h2><table class="table"><thead><tr><th>Event</th><th>Details</th><th>Time</th></tr></thead><tbody>{% for item in activities %}<tr><td>{{ item.activity_type|replace('_', ' ')|title }}</td><td>{{ item.description }}</td><td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td></tr>{% else %}<tr><td colspan="3">No account activity yet.</td></tr>{% endfor %}</tbody></table></section>
+</section>
+{% endblock %}

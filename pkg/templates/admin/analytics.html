@@ -1,0 +1,21 @@
+{% extends 'admin/base.html' %}
+{% block title %}Analytics{% endblock %}
+{% block description %}Private Vic Voices administrator analytics for usage and platform activity.{% endblock %}
+{% block content %}
+  <div class="admin-panel">
+    <h2>Analytics</h2>
+    <div class="stats-grid">
+      <div class="stat"><span class="muted">Successful jobs</span><strong>{{ successful }}</strong></div>
+      <div class="stat"><span class="muted">Failed jobs</span><strong>{{ failed }}</strong></div>
+      <div class="stat"><span class="muted">Avg. processing time</span><strong>{{ '%.2f'|format(avg_duration) }}s</strong></div>
+    </div>
+    <table class="table" style="margin-top: 18px;">
+      <thead><tr><th>Period</th><th>Registrations</th></tr></thead>
+      <tbody>
+        {% for item in registrations %}
+          <tr><td>{{ item.period }}</td><td>{{ item.count }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

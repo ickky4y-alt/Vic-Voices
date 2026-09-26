@@ -1,0 +1,15 @@
+{% extends 'admin/base.html' %}
+{% block title %}System Health{% endblock %}
+{% block description %}Inspect private Vic Voices service, audio, and system health information.{% endblock %}
+{% block content %}
+  <div class="admin-panel">
+    <h2>System Health</h2>
+    <table class="table">
+      <tbody>
+        {% for key, value in health.items() %}
+          <tr><th>{{ key.replace('_', ' ')|title }}</th><td>{{ value }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

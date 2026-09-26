@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}Activity | Vic Voices{% endblock %}
+{% block description %}Review the recent sign-in and account activity recorded for your Vic Voices profile.{% endblock %}
+{% block robots %}noindex, nofollow, noarchive{% endblock %}
+{% block content %}<h1>Your activity</h1><div class="card"><table class="table"><thead><tr><th>Event</th><th>Details</th><th>Time</th></tr></thead><tbody>{% for item in activities %}<tr><td>{{ item.activity_type|replace('_', ' ')|title }}</td><td>{{ item.description }}</td><td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td></tr>{% else %}<tr><td colspan="3">No activity recorded yet.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

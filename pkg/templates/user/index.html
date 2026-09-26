@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}VoiceForge | Create with your voice{% endblock %}
+{% block description %}Create expressive text-to-speech audio, explore voice styles, and convert recordings with local RVC models in the Vic Voices studio.{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/voiceforge.css') }}">{% endblock %}
+{% block content %}
+<section class="home-hero">
+  <div class="home-hero-copy"><p class="eyebrow">VoiceForge audio studio</p><h1>Make every word sound like you mean it.</h1><p class="lede">Turn text into expressive speech, convert recordings with local RVC voices, and explore different styles without sending your audio to the cloud.</p><div class="cta-row">{% if not current_user.is_authenticated %}<a class="button primary" href="#tts-section">Try it now <span aria-hidden="true">&rarr;</span></a>{% endif %}<a class="button secondary" href="{{ url_for('user.voice_library') }}">Explore voices</a></div>{% if not current_user.is_authenticated %}<div class="trust-line"><span class="pulse-dot"></span> {{ guest_tts_trials }} free guest trials • no account required</div>{% endif %}</div>
+  <div class="home-hero-art" aria-label="Animated audio waveform illustration"><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-disc"><span class="disc-core">VF</span></div><div class="art-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="art-label label-top">TEXT</span><span class="art-label label-bottom">VOICE</span></div>
+</section>
+
+<section class="pricing-section">
+  <div class="section-heading"><p class="eyebrow">Simple pricing</p><h2>Pick the plan that fits your voice.</h2></div>
+  <div class="pricing-grid">
+    <article class="pricing-card">
+      <div class="pricing-card__head">
+        <span class="plan-badge">Monthly</span>
+        <span class="plan-icon">◔</span>
+      </div>
+      <h3>Monthly</h3>
+      <div class="plan-price"><span class="old-price">{{ billing_currency }}{{ monthly_plan.original }}</span><span class="new-price">{{ billing_currency }}{{ monthly_plan.sale }}</span></div>
+      <p class="save-badge">Save {{ (100 - (monthly_plan.sale|float / monthly_plan.original|float * 100))|int }}%</p>
+      <ul>
+        <li>Unlimited speech library access</li>
+        <li>Instant TTS generation</li>
+        <li>Fast project workflow</li>
+      </ul>
+      <a class="button secondary" href="{{ url_for('user.login') }}?next={{ url_for('user.billing') | urlencode }}">Get started</a>
+    </article>
+    <article class="pricing-card pricing-card--featured">
+      <div class="pricing-card__head">
+        <span class="plan-badge plan-badge--featured">Best value</span>
+        <span class="plan-icon">✦</span>
+      </div>
+      <h3>Quarterly</h3>
+      <div class="plan-price"><span class="old-price">{{ billing_currency }}{{ quarterly_plan.original }}</span><span class="new-price">{{ billing_currency }}{{ quarterly_plan.sale }}</span></div>
+      <p class="save-badge">Save {{ (100 - (quarterly_plan.sale|float / quarterly_plan.original|float * 100))|int }}%</p>
+      <ul>
+        <li>Priority access to new voice packs</li>
+        <li>Longer creative runway</li>
+        <li>Faster project turnaround</li>
+      </ul>
+      <a class="button primary" href="{{ url_for('user.login') }}?next={{ url_for('user.billing') | urlencode }}">Choose plan</a>
+    </article>
+    <article class="pricing-card">
+      <div class="pricing-card__head">
+        <span class="plan-badge">Annual</span>
+        <span class="plan-icon">◎</span>
+      </div>
+      <h3>Annual</h3>
+      <div class="plan-price"><span class="old-price">{{ billing_currency }}{{ annual_plan.original }}</span><span class="new-price">{{ billing_currency }}{{ annual_plan.sale }}</span></div>
+      <p class="save-badge">Save {{ (100 - (annual_plan.sale|float / annual_plan.original|float * 100))|int }}%</p>
+      <ul>
+        <li>Best ROI for creators</li>
+        <li>Priority support</li>
+        <li>Full studio access</li>
+      </ul>
+      <a class="button secondary" href="{{ url_for('user.login') }}?next={{ url_for('user.billing') | urlencode }}">Start annual</a>
+    </article>
+  </div>
+</section>
+
+{% if current_user.is_authenticated %}
+<section class="trial-summary-home card-form" aria-label="Your free trial balance">
+  <div><p class="eyebrow">Your complimentary studio trials</p><h2>Welcome back, {{ current_user.name }}.</h2><p class="muted">Preview voices freely. Your balance only changes after speech is generated or an audio conversion succeeds. Successful audio is saved in <a href="{{ url_for('user.history') }}">History</a>; free storage lasts 7 days, and paid access extends it with a 7-day grace period.</p></div>
+  <div class="trial-summary-home__balances"><span><i class="bi bi-soundwave" aria-hidden="true"></i> TTS: <strong>{{ tts_trials_available }}</strong> {{ 'available' if tts_trials_available == 'Unlimited' else 'free' }}</span><span><i class="bi bi-music-note-beamed" aria-hidden="true"></i> Audio conversion: <strong>{{ conversion_trials_available }}</strong> {{ 'available' if conversion_trials_available == 'Unlimited' else 'free' }}</span></div>
+  <a class="button primary" href="{{ url_for('user.converter') }}">Use your studio trials</a>
+</section>
+{% else %}
+<section id="tts-section" class="tts-section">
+  <div class="section-heading"><p class="eyebrow">Start creating for free</p><h2>{{ guest_tts_trials }} free visitor TTS trials—then unlock more in your account.</h2></div>
+  <div class="guest-trial-banner"><strong>Enjoy {{ guest_tts_trials }} free speech creations as a visitor.</strong> Create a free account to unlock {{ registered_tts_trials }} TTS generations and {{ conversion_trials }} Vic RVC audio conversions for your account. These are separate from visitor trials, and free voice previews never use a trial. Successful audio is saved for 7 days; upgrade for longer storage.</div>
+  <div class="converter-panel converter-panel--tts">
+    <form id="tts-form" class="forge-card">
+      <div class="field">
+        <div class="label-row"><label for="text">Your script</label><span id="counter">0 / 2000</span></div>
+        <textarea id="text" maxlength="2000" placeholder="Type something worth hearing..." required></textarea>
+      </div>
+      <div class="field">
+        <label for="voice">Voice</label>
+        <select id="voice" required><option value="">Loading preset voices...</option></select>
+      </div>
+      <div class="field">
+        <label for="style">Speech style</label>
+        <select id="style" required><option value="">Loading styles...</option></select>
+        <small id="style-description" class="field-hint"></small>
+      </div>
+      <div class="field">
+        <div class="label-row"><label for="speed">Playback speed</label><output id="speed-value">1.00x</output></div>
+        <input id="speed" type="range" min="0.5" max="2" step="0.05" value="1">
+      </div>
+      <button id="generate" class="forge-button" type="submit"><span class="spinner" aria-hidden="true"></span><span>Generate speech</span></button>
+      <p id="message" class="message" role="status" aria-live="polite"></p>
+      <div id="result" class="result" hidden>
+        <audio id="player" controls></audio>
+        <label class="player-speed">Player speed <select id="player-speed"><option>0.75</option><option selected>1</option><option>1.25</option><option>1.5</option><option>2</option></select>x</label>
+        <a id="download" class="download" download>Download audio</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endif %}
+
+<section class="home-voice-previews" aria-labelledby="home-voices-title">
+  <div class="section-heading"><div><p class="eyebrow">Listen before you choose</p><h2 id="home-voices-title">Meet your Vic TTS voices.</h2><p class="muted">Tap a preview to hear each voice and style. Listening is always free and does not use a trial.</p></div><a class="button secondary" href="{{ url_for('user.voice_library') }}">Explore all voices <span aria-hidden="true">&rarr;</span></a></div>
+  <div class="voice-grid home-voice-grid">
+    {% for voice in preview_voices %}
+    <article class="voice-card"><p class="eyebrow">{{ voice.gender|title }} voice</p><h3>{{ voice.name }}</h3><div class="preview-actions">{% for item in preview_styles %}<button class="button secondary preview-button" type="button" data-voice="{{ voice.id }}" data-style="{{ item.id }}">Play {{ item.name }}</button>{% endfor %}</div><audio class="preview-player" controls hidden></audio></article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="how-it-works"><div class="section-heading"><p class="eyebrow">From idea to audio</p><h2>Choose your path. Find your sound.</h2></div><div class="feature-grid"><article class="feature-card feature-image image-write"><div class="feature-icon">Aa</div><p class="step-number">01</p><h3>Write it</h3><p>Choose a preset voice, set a style, and turn your words into downloadable speech.</p>{% if current_user.is_authenticated %}<a href="{{ url_for('user.converter') }}">Open converter <span aria-hidden="true">&rarr;</span></a>{% else %}<a href="#tts-section">Create speech <span aria-hidden="true">&rarr;</span></a>{% endif %}</article><article class="feature-card feature-image image-record"><div class="feature-icon">&#9679;</div><p class="step-number">02</p><h3>Record it</h3><p>Capture a take from your microphone, then send it through a local conversion model.</p><a href="{{ url_for('user.record') }}">Record a take <span aria-hidden="true">&rarr;</span></a></article><article class="feature-card feature-image image-explore"><div class="feature-icon">&#9835;</div><p class="step-number">03</p><h3>Shape it</h3><p>Compare voices and emotion styles in the library until one feels right.</p><a href="{{ url_for('user.voice_library') }}">Browse the library <span aria-hidden="true">&rarr;</span></a></article></div></section>
+<section class="lamzy-band"><div class="lamzy-spark spark-one"></div><div class="lamzy-spark spark-two"></div><div><p class="eyebrow">Made together</p><h2>In collaboration with <strong>Lamzy</strong></h2><p>Ideas in. Better voices out.</p></div><div class="lamzy-mark" aria-hidden="true">L<span>+</span>VF</div></section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/voiceforge.js') }}"></script><script src="{{ url_for('static', filename='js/voice-library.js') }}"></script>{% endblock %}

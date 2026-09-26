@@ -1,0 +1,23 @@
+{% extends 'admin/base.html' %}
+{% block title %}Admin Profile{% endblock %}
+{% block description %}Manage the signed-in administrator profile for Vic Voices.{% endblock %}
+{% block content %}
+  <div class="admin-panel">
+    <h2>Admin Profile</h2>
+    <form method="post">
+      <div class="field">
+        <label>Name</label>
+        <input class="input" name="name" value="{{ user.name }}">
+      </div>
+      <div class="field">
+        <label>Current password</label>
+        <input class="input" type="password" name="current_password">
+      </div>
+      <div class="field">
+        <label>New password</label>
+        <input class="input" type="password" name="password">
+      </div>
+      <button class="btn primary" type="submit">Update profile</button>
+    </form>
+  </div>
+{% endblock %}

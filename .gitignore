@@ -1,0 +1,62 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+instance/
+*.secret
+
+# Python environments and build outputs
+.venv/
+venv/
+env/
+vvic-voices/
+.voiceforge-venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local databases, logs, and generated audio
+*.db
+*.sqlite
+*.sqlite3
+*.log
+server-5001.*.log
+rvc_test_input.wav
+storage/**
+!storage/.gitkeep
+
+# Platform-specific bundled executables; Railway installs FFmpeg from Nix
+pkg/ffmpeg/
+
+# RVC runtime environments and user/model data (store on Railway Volume)
+pkg/rvc/**/.venv/
+pkg/rvc/**/venv/
+pkg/rvc/**/assets/weights/
+pkg/rvc/**/assets/indices/
+pkg/rvc/**/assets/.cache/
+pkg/rvc/**/assets/hubert_base/pytorch_model.bin
+pkg/rvc/**/assets/rmvpe/rmvpe.pt
+pkg/rvc/**/assets/pymss_weights/
+pkg/rvc/assests/
+pkg/rvc/**/logs/
+pkg/rvc/**/TEMP/
+pkg/rvc/**/TEMP_*/
+pkg/rvc/**/RVCRealtimeVST/
+pkg/rvc/**/docs/
+pkg/rvc/**/tools/pymss/
+pkg/rvc/**/tools/pymss_core/
+pkg/rvc/**/rvc_live.*.log
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

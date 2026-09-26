@@ -1,0 +1,12 @@
+[phases.setup]
+nixPkgs = ["ffmpeg", "gcc", "pkg-config", "libsndfile"]
+
+[phases.install]
+cmds = [
+  "python -m pip install --upgrade pip",
+  "python -m pip install -r pkg/rvc/Retrieval-based-Voice-Conversion-WebUI-main/requirments_cpu_py312.txt",
+  "python -m pip install -r requirements.txt"
+]
+
+[start]
+cmd = "gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 600 --access-logfile - --error-logfile - 'pkg:create_app()'"

@@ -1,0 +1,26 @@
+{% extends 'admin/base.html' %}
+{% block title %}Audit Logs{% endblock %}
+{% block description %}Private administrative audit log for Vic Voices account and system events.{% endblock %}
+{% block content %}
+  <div class="admin-panel">
+    <h2>Audit Logs</h2>
+    <table class="table">
+      <thead>
+        <tr><th>Action</th><th>Target</th><th>User</th><th>Status</th><th>Time</th></tr>
+      </thead>
+      <tbody>
+        {% for item in logs %}
+          <tr>
+            <td>{{ item.action }}</td>
+            <td>{{ item.target_type }} / {{ item.target_id }}</td>
+            <td>{{ item.user.email if item.user else 'System' }}</td>
+            <td>{{ item.status }}</td>
+            <td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5">No audit entries.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

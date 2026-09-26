@@ -1,0 +1,26 @@
+{% extends 'admin/base.html' %}
+{% block title %}Conversions{% endblock %}
+{% block description %}Review and manage audio conversion jobs in the private Vic Voices admin console.{% endblock %}
+{% block content %}
+  <div class="admin-panel">
+    <h2>Conversions</h2>
+    <table class="table">
+      <thead>
+        <tr><th>ID</th><th>Voice</th><th>Status</th><th>User</th><th>Created</th></tr>
+      </thead>
+      <tbody>
+        {% for conversion in conversions %}
+          <tr>
+            <td>{{ conversion.id }}</td>
+            <td>{{ conversion.voice_name }}</td>
+            <td>{{ conversion.status }}</td>
+            <td>{{ conversion.user.email if conversion.user else 'Guest' }}</td>
+            <td>{{ conversion.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5">No conversions have been processed yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

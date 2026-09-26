@@ -1,0 +1,44 @@
+{% extends 'admin/base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block description %}Private Vic Voices administrator overview of users, conversions, models, and platform activity.{% endblock %}
+{% block content %}
+  <div class="admin-panel">
+    <h2>Dashboard Overview</h2>
+    <div class="stats-grid">
+      <div class="stat"><span class="muted">Users</span><strong>{{ total_users }}</strong></div>
+      <div class="stat"><span class="muted">New this week</span><strong>{{ new_users }}</strong></div>
+      <div class="stat"><span class="muted">Active 30d</span><strong>{{ active_users }}</strong></div>
+      <div class="stat"><span class="muted">Conversions</span><strong>{{ total_conversions }}</strong></div>
+      <div class="stat"><span class="muted">Completed</span><strong>{{ successful_conversions }}</strong></div>
+      <div class="stat"><span class="muted">Failed</span><strong>{{ failed_conversions }}</strong></div>
+      <div class="stat"><span class="muted">Models</span><strong>{{ total_models }}</strong></div>
+      <div class="stat"><span class="muted">Queued jobs</span><strong>{{ queued_jobs }}</strong></div>
+    </div>
+  </div>
+
+  <div class="admin-panel" style="margin-top: 22px;">
+    <h3>Recent Activity</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>Target</th>
+          <th>Status</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in recent_activity %}
+          <tr>
+            <td>{{ item.action }}</td>
+            <td>{{ item.target_type }}: {{ item.target_id }}</td>
+            <td>{{ item.status }}</td>
+            <td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') if item.created_at else '-' }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4">No activity yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

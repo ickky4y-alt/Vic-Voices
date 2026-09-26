@@ -1,0 +1,82 @@
+{% extends 'admin/base.html' %}
+{% block title %}Settings{% endblock %}
+{% block description %}Configure private Vic Voices application, access, and payment settings.{% endblock %}
+{% block content %}
+  <div class="admin-panel">
+    <h2>Application Settings</h2>
+    <form method="post">
+      <div class="form-grid">
+        <div class="field">
+          <label>Registration enabled</label>
+          <select class="select" name="registration_enabled">
+            <option value="true" {% if settings.get('registration_enabled') == 'true' %}selected{% endif %}>True</option>
+            <option value="false" {% if settings.get('registration_enabled') == 'false' %}selected{% endif %}>False</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Maintenance mode</label>
+          <select class="select" name="maintenance_mode">
+            <option value="false" {% if settings.get('maintenance_mode') == 'false' %}selected{% endif %}>False</option>
+            <option value="true" {% if settings.get('maintenance_mode') == 'true' %}selected{% endif %}>True</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Max upload MB</label>
+          <input class="input" name="max_upload_mb" value="{{ settings.get('max_upload_mb', '50') }}">
+        </div>
+        <div class="field">
+          <label>Max concurrent jobs</label>
+          <input class="input" name="max_concurrent_jobs" value="{{ settings.get('max_concurrent_jobs', '2') }}">
+        </div>
+        <div class="field">
+          <label>Job timeout seconds</label>
+          <input class="input" name="job_timeout_seconds" value="{{ settings.get('job_timeout_seconds', '600') }}">
+        </div>
+        <div class="field">
+          <label>Billing currency</label>
+          <select class="select" name="billing_currency">
+            <option value="USD" {% if settings.get('billing_currency') == 'USD' %}selected{% endif %}>USD</option>
+            <option value="NGN" {% if settings.get('billing_currency') == 'NGN' %}selected{% endif %}>NGN</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn primary" type="submit">Save settings</button>
+    </form>
+
+    <h3>Free trial limits</h3>
+    <p class="muted">New accounts use these limits. Existing account balances are unchanged. The guest TTS limit is checked against each device’s recorded usage.</p>
+    <form method="post">
+      <div class="form-grid">
+        <div class="field">
+          <label for="guest-tts-trials">Guest text-to-speech trials per device</label>
+          <input class="input" id="guest-tts-trials" name="guest_tts_trials" type="number" min="0" max="1000000" step="1" required value="{{ settings.get('guest_tts_trials', '3') }}">
+        </div>
+        <div class="field">
+          <label for="registered-tts-trials">Registered-user text-to-speech trials</label>
+          <input class="input" id="registered-tts-trials" name="registered_tts_trials" type="number" min="0" max="1000000" step="1" required value="{{ settings.get('registered_tts_trials', '8') }}">
+        </div>
+        <div class="field">
+          <label for="conversion-trials">Registered-user audio conversion trials</label>
+          <input class="input" id="conversion-trials" name="conversion_trials" type="number" min="0" max="1000000" step="1" required value="{{ settings.get('conversion_trials', '5') }}">
+        </div>
+      </div>
+      <button class="btn primary" type="submit">Save trial limits</button>
+    </form>
+
+    <h3>Pricing plans</h3>
+    <form method="post">
+      <div class="form-grid">
+        <div class="field"><label>Monthly original price</label><input class="input" name="monthly_original_price" value="{{ settings.get('monthly_original_price', '20') }}"></div>
+        <div class="field"><label>Monthly sale price</label><input class="input" name="monthly_sale_price" value="{{ settings.get('monthly_sale_price', '10') }}"></div>
+        <div class="field"><label>Quarterly original price</label><input class="input" name="quarterly_original_price" value="{{ settings.get('quarterly_original_price', '50') }}"></div>
+        <div class="field"><label>Quarterly sale price</label><input class="input" name="quarterly_sale_price" value="{{ settings.get('quarterly_sale_price', '30') }}"></div>
+        <div class="field"><label>Annual original price</label><input class="input" name="annual_original_price" value="{{ settings.get('annual_original_price', '120') }}"></div>
+        <div class="field"><label>Annual sale price</label><input class="input" name="annual_sale_price" value="{{ settings.get('annual_sale_price', '70') }}"></div>
+      </div>
+      <button class="btn primary" type="submit">Save pricing</button>
+    </form>
+
+    <h3>Payment instructions</h3>
+    <form method="post"><div class="field"><label>Bank name</label><input class="input" name="payment_bank_name" value="{{ settings.get('payment_bank_name', '') }}"></div><div class="field"><label>Account name</label><input class="input" name="payment_account_name" value="{{ settings.get('payment_account_name', '') }}"></div><div class="field"><label>Account number</label><input class="input" name="payment_account_number" value="{{ settings.get('payment_account_number', '') }}"></div><div class="field"><label>Instructions</label><textarea class="input" name="payment_instructions">{{ settings.get('payment_instructions', '') }}</textarea></div><button class="btn primary" type="submit">Save payment details</button></form>
+  </div>
+{% endblock %}

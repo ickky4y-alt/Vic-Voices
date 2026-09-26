@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Register | Vic Voices{% endblock %}
+{% block description %}Create a Vic Voices account to use the audio converter, manage projects, and save your favorite voices.{% endblock %}
+{% block robots %}noindex, nofollow, noarchive{% endblock %}
+{% block content %}
+<h1>Create account</h1>
+<form method="post" class="card-form">
+  {{ form.hidden_tag() }}
+  <div class="field">
+    {{ form.name.label }}
+    {{ form.name(class_='input') }}
+  </div>
+  <div class="field">
+    {{ form.email.label }}
+    {{ form.email(class_='input') }}
+  </div>
+  <div class="field">
+    {{ form.password.label }}
+    {{ form.password(class_='input') }}
+    {% for error in form.password.errors %}<small class="error-box">{{ error }}</small>{% endfor %}
+  </div>
+  <div class="field">
+    {{ form.confirm_password.label }}
+    {{ form.confirm_password(class_='input') }}
+    {% for error in form.confirm_password.errors %}<small class="error-box">{{ error }}</small>{% endfor %}
+  </div>
+  <button type="submit" class="button primary">Create account</button>
+</form>
+{% endblock %}

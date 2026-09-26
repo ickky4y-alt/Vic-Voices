@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}Favorites | Vic Voices{% endblock %}
+{% block description %}View and manage the voice models saved to your private Vic Voices favorites list.{% endblock %}
+{% block robots %}noindex, nofollow, noarchive{% endblock %}
+{% block content %}<h1>Favorite voices</h1><div class="info-grid">{% for item in favorites %}<article><h3>{{ item.voice_name }}</h3><p class="muted">Saved voice model</p>{% if item.voice_model %}<form method="post" action="{{ url_for('user.toggle_favorite', model_id=item.voice_model.id) }}"><button class="button secondary" type="submit">Remove favorite</button></form>{% endif %}</article>{% else %}<article><p>No favorites yet. Browse the voice library to save one.</p></article>{% endfor %}</div>{% endblock %}

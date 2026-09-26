@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#08101b">
+    <meta name="color-scheme" content="dark">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <title>{% block title %}Vic Voices Admin{% endblock %}</title>
+    <meta name="description" content="{% block description %}Secure Vic Voices administration for account, model, payment, and system management.{% endblock %}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/vic-voices.svg') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/vic-voices.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-icons/font/bootstrap-icons.min.css') }}">
+    <style>
+      body { margin: 0; background: #08101b; color: #edf2ff; font-family: Inter, ui-sans-serif, system-ui, "Segoe UI", sans-serif; }
+      .admin-shell { max-width: 1400px; margin: 0 auto; padding: 24px 20px 60px; }
+      .admin-topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(15, 23, 32, 0.9); }
+      .admin-brand { color: inherit; font-size: 1.3rem; font-weight: 700; text-decoration: none; }
+      .admin-brand .bi { color: #22d3ee; }
+      .admin-brand::after { content: ' / studio control'; display: block; color: #22d3ee; font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; margin-top: 4px; animation: adminGlow 2.6s ease-in-out infinite alternate; }
+      .admin-nav { display: flex; gap: 14px; flex-wrap: wrap; }
+      .admin-nav a { color: #cddbf8; }
+      .admin-grid { display: grid; grid-template-columns: 230px 1fr; gap: 22px; margin-top: 24px; }
+      .admin-sidebar { background: rgba(17,24,39,0.88); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 18px; }
+      .admin-sidebar ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+      .admin-sidebar a { display: block; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.02); border: 1px solid transparent; }
+      .admin-sidebar a:hover { border-color: rgba(124,58,237,0.5); }
+      .admin-panel { min-width: 0; background: rgba(17,24,39,0.88); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 22px; }
+      .admin-panel { animation: adminRise .45s ease both; }
+      .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); gap: 16px; }
+      .stat { background: rgba(255,255,255,0.02); padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); }
+      .stat strong { display: block; font-size: 1.8rem; margin-top: 8px; }
+      .table { display: block; width: 100%; max-width: 100%; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; border-collapse: collapse; }
+      .table th, .table td { border-bottom: 1px solid rgba(255,255,255,0.08); padding: 10px 8px; text-align: left; }
+      .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.14); background: transparent; color: var(--text); cursor: pointer; }
+      .btn.primary { background: linear-gradient(135deg, var(--primary), #8b5cf6); border: none; }
+      .btn.danger { background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.4); }
+      .muted { color: #a9b7d2; }
+      .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+      .field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+      .input, .select, textarea { width: 100%; background: rgba(255,255,255,0.02); color: var(--text); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 12px; }
+      textarea { min-height: 120px; }
+      .flash-wrap { margin-bottom: 18px; }
+      .flash { padding: 12px 14px; border-radius: 12px; }
+      .flash-success { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.4); }
+      .flash-error { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.4); }
+      @keyframes adminRise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes adminGlow { from { opacity: .65; } to { opacity: 1; text-shadow: 0 0 14px rgba(34,211,238,.55); } }
+      @media (max-width: 860px) { .admin-grid { grid-template-columns: minmax(0, 1fr); } .admin-grid > *, .admin-panel { min-width: 0; } .form-grid { grid-template-columns: 1fr; } }
+      @media (max-width: 600px) { .admin-shell { padding: 18px 12px 42px; } .admin-panel { padding: 16px; } .admin-topbar { padding: 14px 16px; } .stats-grid { grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); } }
+      @media (max-width: 900px) { .admin-topbar { flex-wrap: wrap; } .admin-topbar > .admin-nav { display: none; } .admin-topbar > .admin-nav.is-open { display: flex; flex-basis: 100%; flex-direction: column; padding-top: 12px; } }
+    </style>
+  </head>
+  <body>
+    <div class="admin-topbar">
+      <a class="admin-brand" href="{{ url_for('admin.dashboard') }}" aria-label="Vic Voices admin dashboard"><i class="bi bi-soundwave" aria-hidden="true"></i> Vic Voices Admin</a>
+      <button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="admin-nav" data-nav-target="admin-nav" data-nav-toggle>
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+      <div class="admin-nav" id="admin-nav">
+        <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('admin.users') }}">Users</a>
+        <a href="{{ url_for('admin.models') }}">Models</a>
+        <a href="{{ url_for('admin.conversions') }}">Conversions</a>
+        <a href="{{ url_for('admin.payments') }}">Payments</a>
+        <a href="{{ url_for('admin.contact_messages') }}">Contact inbox</a>
+        <a href="{{ url_for('admin.analytics') }}">Analytics</a>
+        <a href="{{ url_for('admin.settings') }}">Settings</a>
+        <a href="{{ url_for('admin.profile') }}">Profile</a>
+        <a href="{{ url_for('admin.logout') }}">Logout</a>
+      </div>
+    </div>
+
+    <div class="admin-shell">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-wrap">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+    <footer class="site-footer">
+      <div class="footer-signal" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="footer-copy"><strong>Vic Voices</strong><span>Local audio tools for bold ideas.</span></div>
+      <a class="footer-contact" href="mailto:ickky1y@gmail.com">ickky1y@gmail.com <span aria-hidden="true">&rarr;</span></a>
+      <p class="footer-legal">Built with care by the Vic Voices creator.</p>
+    </footer>
+    <script src="{{ url_for('static', filename='js/nav.js') }}" defer></script>
+    {% if current_user.is_authenticated %}
+      <script>
+        window.addEventListener('pageshow', function (event) {
+          if (event.persisted) window.location.reload();
+        });
+      </script>
+    {% endif %}
+  </body>
+</html>

@@ -1,0 +1,52 @@
+{% extends 'admin/base.html' %}
+{% block title %}User Profile{% endblock %}
+{% block description %}Private administrator view of a Vic Voices user account and related records.{% endblock %}
+{% block content %}
+  <div class="admin-panel">
+    <h2>{{ user.name }}</h2>
+    <p class="muted">{{ user.email }} · {{ user.role }}</p>
+    <form method="post" action="{{ url_for('admin.change_user_role', user_id=user.id) }}">
+      <div class="field">
+        <label>Role</label>
+        <select class="select" name="role">
+          <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+          <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+        </select>
+      </div>
+      <button class="btn primary" type="submit">Update role</button>
+    </form>
+    <form method="post" action="{{ url_for('admin.toggle_user_status', user_id=user.id) }}" style="margin-top: 18px;">
+      <button class="btn {% if user.active %}danger{% else %}primary{% endif %}" type="submit">
+        {% if user.active %}Disable{% else %}Enable{% endif %} account
+      </button>
+    </form>
+  </div>
+
+  <div class="admin-panel" style="margin-top: 22px;">
+    <h3>Contact issues</h3>
+    {% for message in contact_messages %}<div class="contact-message-panel" style="margin-top:14px"><div class="contact-message-meta"><div><span class="plan-badge">{{ message.category|title }}</span><h4>{{ message.subject }}</h4><p class="muted">{{ message.created_at.strftime('%Y-%m-%d %H:%M') }}</p></div><span class="muted">{{ message.status|title }}</span></div><p class="contact-message-body">{{ message.message }}</p>{% if message.status == 'open' %}<form method="post" action="{{ url_for('admin.contact_messages') }}"><input type="hidden" name="message_id" value="{{ message.id }}"><div class="field"><label>Resolution note</label><textarea class="input" name="admin_response" rows="2" required placeholder="Explain what the user should do next"></textarea></div><button class="btn primary" type="submit"><i class="bi bi-check2-circle"></i> Resolve and notify user</button></form>{% elif message.admin_response %}<p class="muted"><strong>Response:</strong> {{ message.admin_response }}</p>{% endif %}</div>{% else %}<p class="muted">No contact issues from this user.</p>{% endfor %}
+  </div>
+
+  <div class="admin-panel" style="margin-top: 22px;">
+    <h3>Access and trials</h3>
+    <p class="muted">{{ entitlement.tts_trials_remaining }} TTS trials · {{ entitlement.conversion_trials_remaining }} conversion trials</p>
+    <p class="muted">Access expires: {{ entitlement.access_expires_at.strftime('%Y-%m-%d') if entitlement.access_expires_at else 'Not active' }}</p>
+    <form method="post" action="{{ url_for('admin.grant_access', user_id=user.id) }}"><button class="btn primary" type="submit">Grant 30-day unlimited access</button></form>
+  </div>
+  <div class="admin-panel" style="margin-top: 22px;">
+    <h3>Payment requests</h3>
+    <table class="table"><thead><tr><th>Reference</th><th>Plan</th><th>Status</th><th>Receipt</th><th>Action</th></tr></thead><tbody>{% for payment in payments %}<tr><td>{{ payment.reference_code }}</td><td>{{ payment.plan_key|title }}</td><td>{{ payment.status|title }}</td><td>{% if payment.receipt_filename %}<a href="{{ url_for('admin.payment_receipt', payment_id=payment.id) }}" target="_blank">View</a>{% endif %}</td><td>{% if payment.status == 'pending' %}<form method="post" action="{{ url_for('admin.review_payment', payment_id=payment.id, action='confirm') }}" style="display:inline"><button class="btn primary" type="submit">Confirm & grant</button></form> <form method="post" action="{{ url_for('admin.review_payment', payment_id=payment.id, action='reject') }}" style="display:inline"><button class="btn danger" type="submit">Reject</button></form>{% endif %}</td></tr>{% else %}<tr><td colspan="5">No payment requests.</td></tr>{% endfor %}</tbody></table>
+  </div>
+
+  <div class="admin-panel" style="margin-top: 22px;">
+    <h3>Recent conversions</h3>
+    <table class="table">
+      <thead><tr><th>Model</th><th>Status</th><th>Created</th></tr></thead>
+      <tbody>
+        {% for item in conversions %}
+          <tr><td>{{ item.model_name or item.voice_name }}</td><td>{{ item.status }}</td><td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td></tr>
+        {% else %}<tr><td colspan="3">No conversions found.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
