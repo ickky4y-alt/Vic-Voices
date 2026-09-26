@@ -1,3 +1,4 @@
+-r pkg/rvc/Retrieval-based-Voice-Conversion-WebUI-main/requirments_cpu_py312.txt
 alembic==1.18.4
 blinker==1.9.0
 certifi==2026.6.17
@@ -22,6 +23,8 @@ Jinja2==3.1.6
 Mako==1.3.12
 MarkupSafe==3.0.3
 mysql-connector-python>=9.0,<10
+psycopg2-binary>=2.9.9
+pymysql>=1.1.0
 packaging==26.2
 pluggy==1.6.0
 Pygments==2.20.0

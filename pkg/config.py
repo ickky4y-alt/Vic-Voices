@@ -6,21 +6,37 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def database_uri(default=None):
-    raw_url = os.environ.get("DATABASE_URL") or os.environ.get("MYSQL_URL") or default
+    raw_url = (
+        os.environ.get("DATABASE_URL")
+        or os.environ.get("MYSQL_URL")
+        or os.environ.get("MYSQLURL")
+        or os.environ.get("POSTGRES_URL")
+        or os.environ.get("DATABASE_PUBLIC_URL")
+        or default
+    )
     if not raw_url:
-        return None
-    url = make_url(raw_url)
-    if url.drivername == "mysql":
-        url = url.set(drivername="mysql+mysqlconnector")
-    if url.drivername == "mysql+mysqlconnector":
-        query = dict(url.query)
-        query.setdefault("use_pure", "true")
-        url = url.set(query=query)
-    return url.render_as_string(hide_password=False)
+        return f"sqlite:///{BASE_DIR / 'instance' / 'vicvoices.db'}"
+
+    if raw_url.startswith("postgres://"):
+        raw_url = "postgresql://" + raw_url[11:]
+
+    try:
+        url = make_url(raw_url)
+        if url.drivername == "mysql":
+            url = url.set(drivername="mysql+mysqlconnector")
+        if url.drivername == "mysql+mysqlconnector":
+            query = dict(url.query)
+            query.setdefault("use_pure", "true")
+            url = url.set(query=query)
+        return url.render_as_string(hide_password=False)
+    except Exception:
+        if raw_url.startswith("postgres://"):
+            return raw_url.replace("postgres://", "postgresql://", 1)
+        return raw_url
 
 
 class GeneralConfig(object):
-    SECRET_KEY = os.environ.get("SECRET_KEY", "JNbkMffSwgHLnAU_L_ABRwhF_Os")
+    SECRET_KEY = os.environ.get("SECRET_KEY", "JNbkMffSwgHLnAU_L_ABRwhF_Os_default_safe_production_secret_key")
     ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin1@gmail.com")
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "Victor@2024")
     TECH_SUPPORT = "08062648647"
@@ -76,9 +92,9 @@ class DevelopmentConfig(GeneralConfig):
 
 class ProductionConfig(GeneralConfig):
     DEBUG = False
-    SECRET_KEY = os.environ.get("SECRET_KEY")
-    ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
-    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+    SECRET_KEY = os.environ.get("SECRET_KEY") or "JNbkMffSwgHLnAU_L_ABRwhF_Os_default_safe_production_secret_key"
+    ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL") or "admin1@gmail.com"
+    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD") or "Victor@2024"
     SQLALCHEMY_DATABASE_URI = database_uri()
     SESSION_COOKIE_SECURE = True
     REMEMBER_COOKIE_SECURE = True

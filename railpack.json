@@ -1,0 +1,7 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "buildAptPackages": ["ffmpeg", "gcc", "g++", "pkg-config", "libsndfile1-dev", "build-essential"],
+  "deploy": {
+    "aptPackages": ["ffmpeg", "libsndfile1"]
+  }
+}

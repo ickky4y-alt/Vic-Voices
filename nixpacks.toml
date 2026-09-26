@@ -1,7 +1,0 @@
-providers = ["python"]
-
-[phases.setup]
-nixPkgs = ["...", "ffmpeg", "gcc", "pkg-config", "libsndfile"]
-
-[start]
-cmd = "gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 600 --access-logfile - --error-logfile - 'pkg:create_app()'"
