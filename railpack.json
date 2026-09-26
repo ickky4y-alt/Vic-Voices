@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.railpack.com",
-  "buildAptPackages": ["ffmpeg", "gcc", "g++", "pkg-config", "libsndfile1-dev", "build-essential"],
+  "buildAptPackages": ["ffmpeg", "gcc", "g++", "pkg-config", "libsndfile1-dev", "build-essential", "espeak-ng", "espeak-ng-data"],
   "deploy": {
-    "aptPackages": ["ffmpeg", "libsndfile1"]
+    "aptPackages": ["ffmpeg", "libsndfile1", "espeak-ng", "espeak-ng-data"]
   }
 }
