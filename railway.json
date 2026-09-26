@@ -5,7 +5,7 @@
     "dockerfilePath": null
   },
   "deploy": {
-    "startCommand": "gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 600 --access-logfile - --error-logfile - 'pkg:create_app()'",
+    "startCommand": "gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 600 --access-logfile - --error-logfile - 'pkg:create_app()'",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",

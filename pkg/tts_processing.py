@@ -43,6 +43,16 @@ def _load_pipeline():
     if _pipeline is not None:
         return _pipeline
     try:
+        import torch
+        torch.set_num_threads(1)
+        if hasattr(torch, "set_num_interop_threads"):
+            try:
+                torch.set_num_interop_threads(1)
+            except Exception:
+                pass
+    except Exception:
+        pass
+    try:
         from kokoro import KPipeline
     except ImportError as exc:
         raise RuntimeError("Kokoro is not installed. Install kokoro and soundfile in a compatible Python environment.") from exc
@@ -90,6 +100,11 @@ def _generate_local(text: str, voice: str, output_path: str, ffmpeg_path: str | 
             completed = subprocess.run([ffmpeg_path, "-y", "-i", str(wav_path), "-codec:a", "libmp3lame", "-q:a", "4", str(output)], capture_output=True, text=True)
             if completed.returncode != 0:
                 raise RuntimeError("FFmpeg could not encode the generated audio as MP3.")
+    try:
+        import gc
+        gc.collect()
+    except Exception:
+        pass
     return output
 
 
