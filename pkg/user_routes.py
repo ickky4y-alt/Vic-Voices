@@ -22,7 +22,7 @@ from .tts_processing import STYLE_CATALOG, STYLE_MAP, available_voices, generate
 
 user_bp = Blueprint("user", __name__)
 ALLOWED_EXTENSIONS = {"wav", "mp3", "flac", "m4a", "ogg", "webm"}
-conversion_executor = ThreadPoolExecutor(max_workers=2)
+conversion_executor = ThreadPoolExecutor(max_workers=1)
 PAYMENT_PLANS = {
     "monthly": {"label": "Monthly", "days": 30, "original": "monthly_original_price", "sale": "monthly_sale_price"},
     "quarterly": {"label": "Quarterly", "days": 90, "original": "quarterly_original_price", "sale": "quarterly_sale_price"},
@@ -492,11 +492,6 @@ def converter():
             conversion_message=conversion_message,
         )
 
-    if request.method == "GET":
-        try:
-            RVCService().start_warmup()
-        except Exception:
-            current_app.logger.exception("Could not start RVC model warmup")
     entitlement = get_entitlement(current_user)
     conversion_trials_available = remaining_trials(current_user, "conversion")
     form.model_id.choices = [

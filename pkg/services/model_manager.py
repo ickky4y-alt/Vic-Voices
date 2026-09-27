@@ -4,11 +4,20 @@ from pathlib import Path
 
 class ModelManager:
     def __init__(self, root=None):
-        project_root = Path(__file__).resolve().parents[1]
-        rvc_root = Path(os.environ.get("RVC_ROOT") or project_root / "rvc" / "Retrieval-based-Voice-Conversion-WebUI-main")
-        self.root = Path(root or os.environ.get("MODEL_FOLDER") or rvc_root / "assets" / "weights")
+        rvc_root = self.get_rvc_root()
+        model_env = os.environ.get("MODEL_FOLDER")
+        if root:
+            self.root = Path(root)
+        elif model_env and Path(model_env).is_dir():
+            self.root = Path(model_env)
+        else:
+            self.root = rvc_root / "assets" / "weights"
+
+        index_env = os.environ.get("INDEX_FOLDER")
+        index_dir = Path(index_env) if index_env and Path(index_env).is_dir() else rvc_root / "assets" / "indices"
+
         self.search_roots = [self.root, rvc_root / "assets" / "weights"]
-        self.index_roots = [Path(os.environ.get("INDEX_FOLDER") or rvc_root / "assets" / "indices"), rvc_root / "logs"]
+        self.index_roots = [index_dir, rvc_root / "logs"]
 
     def discover(self):
         models = []
@@ -78,7 +87,10 @@ class ModelManager:
 
     @staticmethod
     def get_rvc_root():
-        return Path(os.environ.get("RVC_ROOT") or Path(__file__).resolve().parents[1] / "rvc" / "Retrieval-based-Voice-Conversion-WebUI-main")
+        env_root = os.environ.get("RVC_ROOT")
+        if env_root and Path(env_root).is_dir():
+            return Path(env_root).resolve()
+        return (Path(__file__).resolve().parents[1] / "rvc" / "Retrieval-based-Voice-Conversion-WebUI-main").resolve()
 
     @staticmethod
     def get_rvc_python():

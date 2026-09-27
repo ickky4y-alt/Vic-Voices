@@ -95,11 +95,17 @@ class Pipeline(object):
             if not hasattr(self, "model_rmvpe"):
                 from infer.rmvpe import RMVPE
 
+                rmvpe_root_val = os.environ.get("rmvpe_root", "")
+                if rmvpe_root_val.endswith(".pt") and os.path.isfile(rmvpe_root_val):
+                    rmvpe_path_val = rmvpe_root_val
+                else:
+                    rmvpe_path_val = os.path.join(rmvpe_root_val, "rmvpe.pt")
+
                 logger.info(
-                    "Loading rmvpe model,%s" % "%s/rmvpe.pt" % os.environ["rmvpe_root"]
+                    "Loading rmvpe model,%s" % rmvpe_path_val
                 )
                 self.model_rmvpe = RMVPE(
-                    "%s/rmvpe.pt" % os.environ["rmvpe_root"],
+                    rmvpe_path_val,
                     is_half=self.is_half,
                     device=self.device,
                 )

@@ -47,6 +47,12 @@ class RVCService:
                 environment["PYTHONIOENCODING"] = "utf-8"
                 if os.environ.get("RVC_DEVICE", "cpu").lower() == "cpu":
                     environment["CUDA_VISIBLE_DEVICES"] = ""
+                hubert_env = os.environ.get("HUBERT_MODEL_PATH")
+                if hubert_env and Path(hubert_env).exists():
+                    environment["HUBERT_MODEL_PATH"] = str(Path(hubert_env).resolve())
+                rmvpe_env = os.environ.get("RMVPE_PATH")
+                if rmvpe_env and Path(rmvpe_env).exists():
+                    environment["RMVPE_PATH"] = str(Path(rmvpe_env).resolve())
                 _worker = subprocess.Popen([self.python_executable(), str(root / "infer" / "cli.py"), "--server"], cwd=str(root), env=environment, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace", bufsize=1)
                 ready = _worker.stdout.readline().strip()
                 if ready != "RVC_SERVER_READY":
@@ -146,7 +152,12 @@ class RVCService:
         index_file = Path(index_path).resolve() if index_path else None
         if index_file and (not index_file.is_file() or index_file.suffix.lower() != ".index"):
             raise FileNotFoundError("The selected RVC index file is unavailable.")
-        rmvpe_file = root / "assets" / "rmvpe" / "rmvpe.pt"
+        rmvpe_env = os.environ.get("RMVPE_PATH")
+        if rmvpe_env and Path(rmvpe_env).exists():
+            _rp = Path(rmvpe_env)
+            rmvpe_file = _rp if _rp.is_file() else _rp / "rmvpe.pt"
+        else:
+            rmvpe_file = root / "assets" / "rmvpe" / "rmvpe.pt"
         if f0_method == "rmvpe" and not rmvpe_file.is_file():
             f0_method = "pm"
         environment = os.environ.copy()

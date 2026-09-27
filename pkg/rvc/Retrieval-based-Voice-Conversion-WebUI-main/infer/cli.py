@@ -20,7 +20,11 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("weight_root", str(PROJECT_ROOT / "assets" / "weights"))
 os.environ.setdefault("index_root", str(PROJECT_ROOT / "logs"))
 os.environ.setdefault("outside_index_root", str(PROJECT_ROOT / "assets" / "indices"))
-os.environ.setdefault("rmvpe_root", str(PROJECT_ROOT / "assets" / "rmvpe"))
+if os.environ.get("RMVPE_PATH"):
+    _rmvpe_p = Path(os.environ["RMVPE_PATH"]).expanduser().resolve()
+    os.environ["rmvpe_root"] = str(_rmvpe_p.parent if _rmvpe_p.is_file() else _rmvpe_p)
+else:
+    os.environ.setdefault("rmvpe_root", str(PROJECT_ROOT / "assets" / "rmvpe"))
 
 AUDIO_EXTENSIONS = {
     ".wav",
@@ -291,11 +295,14 @@ def main(argv=None):
 
 
 def server_main():
-    """Keep the RVC runtime alive and reuse loaded models between requests."""
+    """Keep the RVC runtime alive and release unused models between requests."""
+    import gc
+    import torch
     from infer.vc.modules import VC
 
     config = create_config()
-    models = {}
+    current_model_name = None
+    current_vc = None
     print("RVC_SERVER_READY", flush=True)
     for line in sys.stdin:
         try:
@@ -303,16 +310,26 @@ def server_main():
             model_path = resolve_model(request["model"])
             os.environ["weight_root"] = str(model_path.parent)
             model_name = model_path.name
-            if model_name not in models:
+            if current_model_name != model_name or current_vc is None:
+                if current_vc is not None:
+                    try:
+                        current_vc.get_vc("")
+                    except Exception:
+                        pass
+                    del current_vc
+                    current_vc = None
+                gc.collect()
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
                 vc = VC(config)
                 vc.get_vc(model_name)
-                models[model_name] = vc
+                current_vc = vc
+                current_model_name = model_name
             if request.get("action") == "warmup":
                 print(json.dumps({"ok": True, "action": "warmup", "model": model_name}), flush=True)
                 continue
             index_path = request.get("index") or ""
-            vc = models[model_name]
-            status, result = vc.vc_single(int(request.get("speaker_id", 0)), request["input"], int(request.get("pitch", 0)), request.get("f0_method", "pm"), index_path, float(request.get("index_rate", 0)), int(request.get("resample_sr", 0)), float(request.get("rms_mix_rate", 1)), float(request.get("protect", 0.33)))
+            status, result = current_vc.vc_single(int(request.get("speaker_id", 0)), request["input"], int(request.get("pitch", 0)), request.get("f0_method", "pm"), index_path, float(request.get("index_rate", 0)), int(request.get("resample_sr", 0)), float(request.get("rms_mix_rate", 1)), float(request.get("protect", 0.33)))
             if not result or result[0] is None or result[1] is None:
                 raise RuntimeError(status or "RVC returned no audio")
             write_audio(Path(request["output"]), result[1], result[0], request.get("output_format", "wav"))
